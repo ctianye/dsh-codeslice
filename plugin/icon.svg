@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="CodeSlice">
+  <title>CodeSlice</title>
+  <g fill="none" stroke="#247bbf" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 5.5h18v13H3z" opacity=".35"/>
+    <path d="M8.5 10.2 5.7 12l2.8 1.8M15.5 10.2l2.8 1.8-2.8 1.8"/>
+    <path d="M13.2 9.4l-2.4 5.2"/>
+  </g>
+  <g fill="#247bbf">
+    <circle cx="12" cy="4.2" r="1.5"/>
+    <circle cx="12" cy="19.8" r="1.5"/>
+  </g>
+  <path d="M12 5.7v2.1M12 16.2v2.1" stroke="#247bbf" stroke-width="1.4" stroke-linecap="round"/>
+</svg>
