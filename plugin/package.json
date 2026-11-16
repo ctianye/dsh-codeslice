@@ -5,6 +5,15 @@
   "type": "module",
   "description": "Read a codebase as a graph: an AST knowledge graph with calls, inheritance and rationale, symbol navigation, keyword retrieval over Chinese and English, and a note knowledge base with anchor drift detection — beside the conversation.",
   "icon": "icon.svg",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ctianye/dsh-codeslice.git",
+    "directory": "plugin"
+  },
+  "homepage": "https://github.com/ctianye/dsh-codeslice#readme",
+  "bugs": {
+    "url": "https://github.com/ctianye/dsh-codeslice/issues"
+  },
   "engines": {
     "node": ">=22"
   },
