@@ -2,3 +2,40 @@ node_modules/
 .scratch/
 *.log
 .DS_Store
+dev/ref/
+
+# The verification harness needs react/react-dom/jsdom to mount the real bundle in
+# a DOM. Those are dev-only: `package.json.files` excludes `dev/`, so nothing here
+# ships, and the plugin itself declares zero runtime dependencies.
+plugin/dev/harness/node_modules/
+
+# Local runtime / authoring data. `.codeslice/` is the plugin's shadow tree for
+# citations whose file no longer exists; `notes-export/` is exported user notes.
+.codeslice/
+notes-export/
+.workbuddy/
+
+# Upstream reference material and one-off probe output kept out of the release.
+plugin/dev/ref/
+plugin/dev/.tmp-*
+plugin/dev/*.png
+plugin/vendor/
+
+# Personal reverse-engineering / extracted-host artifacts. They reference local
+# app bundles or auth cookies and are not part of the plugin or its test suite.
+plugin/dev/main-asar.js
+plugin/dev/host-index.js
+plugin/dev/asar.mjs
+plugin/dev/extract-asar.cjs
+plugin/dev/extract-host.cjs
+plugin/dev/mint-cookie.mjs
+plugin/dev/cookie-probe.py
+plugin/dev/fix-desktop-auth.ps1
+plugin/dev/cdp-*.mjs
+plugin/dev/probe-*.mjs
+plugin/dev/_*.mjs
+plugin/dev/tf-probe.mjs
+
+# Publish artifacts
+*.tgz
+plugin/.release/

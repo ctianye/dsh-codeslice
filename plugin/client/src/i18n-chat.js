@@ -1,0 +1,336 @@
+/**
+ * Copy for the conversation workbench.
+ *
+ * Merged into `i18n.js`'s dictionary at load time rather than appended to
+ * `DICT`: that object is one literal, so two authors adding keys to it in
+ * parallel would conflict on every edit and the loser's keys would silently
+ * read as their own names.
+ *
+ * Both languages are complete here and `mergeDict` checks the parity — a key in
+ * `zh` without an `en` counterpart throws at load, which is the only failure
+ * mode that is cheap enough to be fatal: a half-translated panel shipped behind
+ * a "worked on my machine" is much worse than a plugin that refuses to boot.
+ *
+ * Key groups:
+ *   `chat.*`  the conversation panel
+ *   `code.*`  the read-only code pane
+ *   `wb.*`    the segmented workbench shell around them
+ */
+
+import { mergeDict } from './i18n.js';
+
+const CHAT_I18N = {
+  zh: {
+    /* ---- conversation ------------------------------------------------ */
+    'chat.title': '对话',
+    'chat.new': '新建对话',
+    'chat.newHint': '清空当前对话；下一次提问会开一段新的',
+    'chat.empty.title': '开始一次新的阅读对话',
+    'chat.empty.hint': '在代码面板选中一段，点「就这段提问」；或者直接从下面这些问题开始。',
+    'chat.suggest.1': '这个项目的入口在哪里，整体是怎么分层的？',
+    'chat.suggest.2': '检索与索引部分用的是什么方案？',
+    'chat.suggest.3': '这个仓库里最值得先读的三个函数是哪几个？',
+    'chat.placeholder': '向 CodeSlice 提问',
+    'chat.send': '发送',
+    'chat.stop': '停止',
+    'chat.busy': '正在生成回答…',
+    'chat.loading': '正在加载对话…',
+    'chat.mode.snippet': '片段',
+    'chat.mode.project': '全项目',
+    'chat.role.user': '你',
+    'chat.role.assistant': 'CodeSlice',
+
+    /* ---- notes out of a conversation --------------------------------- */
+    'chat.note.make': '做成笔记',
+    'chat.note.busy': '整理中…',
+    'chat.note.whole': '整段整理成笔记',
+    'chat.note.wholeBusy': '整理整段…',
+    'chat.note.made': '已记入笔记',
+    'chat.note.failed': '笔记已保存（{title}），但模型整理失败：{detail}',
+    'chat.note.created': '已生成笔记：{title}',
+
+    /* ---- failures ---------------------------------------------------- */
+    'chat.error.load': '对话加载失败',
+    'chat.error.create': '新建对话失败',
+    'chat.error.aborted': '请求已取消',
+    'chat.error.noteNoConversation': '还没有对话，无法生成笔记',
+    'chat.error.streamEnded': '连接在回答中途断开了，已经收到的部分保留在上面。',
+
+    /* ---- bound selection --------------------------------------------- */
+    'chat.bound': '关于 {path} 第 {start}-{end} 行',
+    'chat.bound.single': '关于 {path} 第 {line} 行',
+    'chat.bound.graph': '图谱节点「{label}」· 追问会带上它的邻域',
+    'chat.bound.none': '未选中代码 · 将以全项目模式提问',
+    'chat.context.toggle': '联系上下文',
+    'chat.context.on': '当前会读取同文件的其他片段作为背景；点击只看选中的代码',
+    'chat.context.off': '当前只讲选中的这段代码；点击允许模型参考上下文',
+
+    /* ---- answer chrome ------------------------------------------------ */
+    'chat.retrieval': '检索到 {count} 段代码',
+    'chat.citation': '{path} 第 {start}-{end} 行',
+    'chat.stopped': '已停止生成',
+    'chat.answer.empty': '（这条回答没有正文）',
+    'chat.seed': '请解释 {path} 第 {start}-{end} 行这段代码在做什么，以及为什么这么写。',
+    'chat.seed.single': '请解释 {path} 第 {line} 行这段代码在做什么，以及为什么这么写。',
+    'chat.seed.graph': '请结合知识图谱说明「{label}」的作用、它与其他部分的联系，以及调用它的地方。',
+    'chat.title.snippet': '关于 {path} 第 {start}-{end} 行',
+
+    /* ---- code pane ---------------------------------------------------- */
+    'code.title': '代码',
+    'code.empty.title': '还没有打开代码',
+    'code.empty.body': '从对话里的引用芯片，或图谱节点的「打开代码」，在这里打开一个文件。',
+    'code.loading': '正在读取代码…',
+    'code.error.title': '代码读取失败',
+    'code.notFound': '这个文件不在工作区里：{path}',
+    'code.selected': '已选第 {start}-{end} 行 · {count} 行',
+    'code.hint': '点行号选起点，再点一行选终点；也可以直接拖选文本',
+    'code.editor.loading': '正在加载编辑器…',
+    'code.editor.failed': '编辑器加载失败',
+    'code.action.ask': '就这段提问',
+    'code.action.note': '存为笔记',
+    'code.action.copy': '复制',
+    'code.action.clear': '取消选择',
+    'code.copied': '已复制',
+    'code.refresh': '重新读取',
+    'code.lines': '{count} 行',
+    'code.symbols': '{count} 个符号',
+    'code.truncated': '显示第 {start}-{end} 行，共 {lines} 行',
+    'code.marker.annotation': '批注',
+    'code.marker.note': '笔记',
+    'code.note.title': '笔记标题',
+    'code.note.save': '保存笔记',
+    'code.note.cancel': '取消',
+    'code.note.saved': '已存为笔记：{title}',
+    'code.note.failed': '存笔记失败：{detail}',
+
+    /* ---- workbench shell ---------------------------------------------- */
+    'wb.chat': '对话',
+    'wb.code': '代码',
+    'wb.graph': '图谱',
+    'wb.graph.missing': '图谱分段不可用：宿主没有提供渲染函数。',
+
+    /* ---- composer bar (normal DSH conversation) ---------------------- */
+    'bar.noSelection': 'CodeSlice · 未选代码',
+    'bar.openHint': '打开 CodeSlice 工作台，选择一个代码范围',
+    'bar.reader': '代码阅读',
+    'bar.readerHint': '在右侧栏打开本项目的代码阅读器，可框选区间并带入对话',
+    'bar.note': '生成笔记',
+    'bar.noteBusy': '整理中…',
+    'bar.noteHint': '把当前这段 DSH 对话整理成一条知识库笔记',
+    'bar.context': '联系上下文',
+    'bar.contextOnHint': '已联系整个项目：回答会参考调用关系、图谱邻居与相关笔记，但仍以选中片段为主；点击只看选中片段',
+    'bar.contextOffHint': '当前只讲选中的这段代码；点击让回答联系整个项目的代码关系',
+    'bar.contextBusy': '同步中…',
+    'bar.noteTitle': '对话笔记',
+    'bar.noteSaved': '已生成笔记：{title}',
+    'bar.noteSavedRaw': '笔记已保存（{title}），但模型整理失败',
+    'bar.noTurns': '这段对话还没有可整理的内容',
+    'bar.noComposer': '当前输入框无法接收代码引用，请先打开一个会话',
+
+    /* ---- CodeSlice workspace ----------------------------------------- */
+    'ws.title': 'CodeSlice 工作台',
+    'ws.tab.code': '代码',
+    'ws.tab.graph': '图谱',
+    'ws.tab.notes': '知识库',
+    'ws.tab.settings': '检索设置',
+    'ws.files.filter': '筛选文件',
+    'ws.hint': '选中行号后可直接就这段提问，问题会进入旁边的正常对话',
+    'ws.jump.graph': '在图谱中定位',
+    'ws.jump.notes': '查看笔记',
+    'ws.graph.askPrompt': '请结合知识图谱说明「{label}」的作用、它与其他部分的联系，以及调用它的地方。{where}',
+    'ws.settings.title': '检索与 RAG',
+    'ws.settings.topK': '检索条数',
+    'ws.settings.rrfK': 'RRF 常数',
+    'ws.settings.includeNotes': '上下文包含笔记',
+    'ws.settings.includeGraph': '上下文包含图谱',
+    'ws.settings.saved': '设置已保存',
+    'ws.index.title': '向量索引（固定切分）',
+    'ws.index.idle': '未建立',
+    'ws.index.ready': '已建立',
+    'ws.index.running': '构建中',
+    'ws.index.error': '构建失败',
+    'ws.index.status': '已索引 {vectors}/{chunks} 段 · {model} · {dims} 维',
+    'ws.index.progress': '进度 {done}/{total} 段，失败 {failed} 段',
+    'ws.index.build': '构建索引',
+    'ws.index.rebuild': '强制重建',
+    'ws.index.started': '索引任务已启动，后台继续生成向量',
+    'ws.index.noModel': '先在上方配置向量模型，再构建索引',
+    'ws.index.stale': '向量模型已变更，当前索引不再参与检索；点「强制重建」重新生成。',
+    'ws.index.hint': '切分固定为桌面端参数（60 行/块，结构块上限 220 行 / 8000 字符），不提供自定义。',
+
+    /* ---- local models / Ollama --------------------------------------- */
+    'ws.models.title': '本地向量模型 / Ollama',
+    'ws.models.available': 'Ollama 已连接',
+    'ws.models.missing': '未检测到 Ollama',
+    'ws.models.model': '向量模型',
+    'ws.models.noneInstalled': '还没有安装本地模型',
+    'ws.models.baseUrl': '接口地址',
+    'ws.models.baseHint': '只允许 127.0.0.1 / localhost，避免误连远端',
+    'ws.models.systemPrompt': '系统提示词',
+    'ws.models.systemHint': '附加在 CodeSlice 内置规则之后；不能覆盖引用与事实约束',
+    'ws.models.detect': '重新检测',
+    'ws.models.test': '测试向量',
+    'ws.models.testing': '测试中…',
+    'ws.models.testOk': '{model} 可用，向量维度 {dims}',
+    'ws.models.testFail': '向量测试失败：{detail}',
+    'ws.models.saved': '模型设置已保存',
+  },
+
+  en: {
+    /* ---- conversation ------------------------------------------------ */
+    'chat.title': 'Conversation',
+    'chat.new': 'New conversation',
+    'chat.newHint': 'Clear this conversation; the next question starts a new one',
+    'chat.empty.title': 'Start a reading conversation',
+    'chat.empty.hint': 'Select code in the code pane and pick "Ask about this", or start from one of these.',
+    'chat.suggest.1': 'Where does this project start, and how is it layered?',
+    'chat.suggest.2': 'What approach do retrieval and indexing use?',
+    'chat.suggest.3': 'Which three functions in this repo are worth reading first?',
+    'chat.placeholder': 'Ask CodeSlice',
+    'chat.send': 'Send',
+    'chat.stop': 'Stop',
+    'chat.busy': 'Generating an answer…',
+    'chat.loading': 'Loading the conversation…',
+    'chat.mode.snippet': 'Snippet',
+    'chat.mode.project': 'Project',
+    'chat.role.user': 'You',
+    'chat.role.assistant': 'CodeSlice',
+
+    /* ---- notes out of a conversation --------------------------------- */
+    'chat.note.make': 'Make a note',
+    'chat.note.busy': 'Summarising…',
+    'chat.note.whole': 'Summarise the session',
+    'chat.note.wholeBusy': 'Summarising…',
+    'chat.note.made': 'Noted',
+    'chat.note.failed': 'The note was saved ({title}), but the model failed to summarise it: {detail}',
+    'chat.note.created': 'Note created: {title}',
+
+    /* ---- failures ---------------------------------------------------- */
+    'chat.error.load': 'Could not load the conversation',
+    'chat.error.create': 'Could not create a conversation',
+    'chat.error.aborted': 'The request was cancelled',
+    'chat.error.noteNoConversation': 'There is no conversation to make a note from yet',
+    'chat.error.streamEnded': 'The connection dropped mid-answer; what arrived is kept above.',
+
+    /* ---- bound selection --------------------------------------------- */
+    'chat.bound': 'About {path} lines {start}-{end}',
+    'chat.bound.single': 'About {path} line {line}',
+    'chat.bound.graph': 'Graph node "{label}" · follow-ups include its neighbourhood',
+    'chat.bound.none': 'No selection · asking about the whole project',
+    'chat.context.toggle': 'Use context',
+    'chat.context.on': 'The rest of the file is read for background; click to see the selection alone',
+    'chat.context.off': 'Only the selected lines are described; click to let the model read the context',
+
+    /* ---- answer chrome ------------------------------------------------ */
+    'chat.retrieval': '{count} code ranges retrieved',
+    'chat.citation': '{path} lines {start}-{end}',
+    'chat.stopped': 'Generation stopped',
+    'chat.answer.empty': '(this answer has no body)',
+    'chat.seed': 'Explain what {path} lines {start}-{end} do, and why it is written this way.',
+    'chat.seed.single': 'Explain what {path} line {line} does, and why it is written this way.',
+    'chat.seed.graph': 'Using the knowledge graph, explain what "{label}" does, how it connects to the rest, and where it is called.',
+    'chat.title.snippet': 'About {path} lines {start}-{end}',
+
+    /* ---- code pane ---------------------------------------------------- */
+    'code.title': 'Code',
+    'code.empty.title': 'No file open',
+    'code.empty.body': 'Open one from a citation chip in the conversation, or from a graph node\'s "Open code".',
+    'code.loading': 'Reading the code…',
+    'code.error.title': 'Could not read the code',
+    'code.notFound': 'That file is not in the workspace: {path}',
+    'code.selected': 'Lines {start}-{end} selected · {count} lines',
+    'code.hint': 'Click a line number for the start, another for the end — or drag text',
+    'code.editor.loading': 'Loading editor…',
+    'code.editor.failed': 'Editor failed to load',
+    'code.action.ask': 'Ask about this',
+    'code.action.note': 'Save as a note',
+    'code.action.copy': 'Copy',
+    'code.action.clear': 'Clear selection',
+    'code.copied': 'Copied',
+    'code.refresh': 'Read again',
+    'code.lines': '{count} lines',
+    'code.symbols': '{count} symbols',
+    'code.truncated': 'Showing lines {start}-{end} of {lines}',
+    'code.marker.annotation': 'Annotation',
+    'code.marker.note': 'Note',
+    'code.note.title': 'Note title',
+    'code.note.save': 'Save note',
+    'code.note.cancel': 'Cancel',
+    'code.note.saved': 'Saved as a note: {title}',
+    'code.note.failed': 'Could not save the note: {detail}',
+
+    /* ---- workbench shell ---------------------------------------------- */
+    'wb.chat': 'Chat',
+    'wb.code': 'Code',
+    'wb.graph': 'Graph',
+    'wb.graph.missing': 'The graph segment is unavailable: the host supplied no render function.',
+
+    /* ---- composer bar (normal DSH conversation) ---------------------- */
+    'bar.noSelection': 'CodeSlice · no selection',
+    'bar.openHint': 'Open the CodeSlice workspace and pick a code range',
+    'bar.reader': 'Code reader',
+    'bar.readerHint': 'Open this project in the right Sidebar and pick a range to quote',
+    'bar.note': 'Make a note',
+    'bar.noteBusy': 'Summarising…',
+    'bar.noteHint': 'Turn this DSH conversation into a knowledge-base note',
+    'bar.context': 'Use context',
+    'bar.contextOnHint': 'Project context is on: answers may use callers, graph neighbours and related notes, but the selected snippet stays primary. Click to focus on the snippet alone',
+    'bar.contextOffHint': 'Only the selected snippet is described. Click to let the answer use the whole project’s code relationships',
+    'bar.contextBusy': 'Syncing…',
+    'bar.noteTitle': 'Conversation note',
+    'bar.noteSaved': 'Note created: {title}',
+    'bar.noteSavedRaw': 'The note was saved ({title}), but the model failed to summarise it',
+    'bar.noTurns': 'This conversation has nothing to summarise yet',
+    'bar.noComposer': 'The composer cannot accept a code reference here; open a session first',
+
+    /* ---- CodeSlice workspace ----------------------------------------- */
+    'ws.title': 'CodeSlice workspace',
+    'ws.tab.code': 'Code',
+    'ws.tab.graph': 'Graph',
+    'ws.tab.notes': 'Knowledge base',
+    'ws.tab.settings': 'Retrieval',
+    'ws.files.filter': 'Filter files',
+    'ws.hint': 'Pick lines, then ask about them; the question goes to the normal conversation',
+    'ws.jump.graph': 'Locate in graph',
+    'ws.jump.notes': 'Open notes',
+    'ws.graph.askPrompt': 'Using the knowledge graph, explain what "{label}" does, how it connects to the rest, and where it is called. {where}',
+    'ws.settings.title': 'Retrieval and RAG',
+    'ws.settings.topK': 'Chunks',
+    'ws.settings.rrfK': 'RRF constant',
+    'ws.settings.includeNotes': 'Include notes in context',
+    'ws.settings.includeGraph': 'Include graph in context',
+    'ws.settings.saved': 'Settings saved',
+    'ws.index.title': 'Vector index (fixed chunking)',
+    'ws.index.idle': 'Not built',
+    'ws.index.ready': 'Ready',
+    'ws.index.running': 'Building',
+    'ws.index.error': 'Build failed',
+    'ws.index.status': '{vectors}/{chunks} chunks indexed · {model} · {dims} dims',
+    'ws.index.progress': '{done}/{total} chunks, {failed} failed',
+    'ws.index.build': 'Build index',
+    'ws.index.rebuild': 'Force rebuild',
+    'ws.index.started': 'Indexing started; vectors are generated in the background',
+    'ws.index.noModel': 'Configure an embedding model above before building the index',
+    'ws.index.stale': 'The embedding model changed; this index no longer participates in retrieval. Click "Force rebuild" to regenerate it.',
+    'ws.index.hint': 'Chunking is fixed to the desktop bands (60-line bands, 220-line / 8000-char structural cap) and is not configurable.',
+
+    /* ---- local models / Ollama --------------------------------------- */
+    'ws.models.title': 'Local embedding model / Ollama',
+    'ws.models.available': 'Ollama connected',
+    'ws.models.missing': 'Ollama not detected',
+    'ws.models.model': 'Embedding model',
+    'ws.models.noneInstalled': 'No local model installed yet',
+    'ws.models.baseUrl': 'Endpoint',
+    'ws.models.baseHint': '127.0.0.1 / localhost only, so a typo cannot reach a remote host',
+    'ws.models.systemPrompt': 'System prompt',
+    'ws.models.systemHint': 'Appended after CodeSlice rules; it cannot override citations or facts',
+    'ws.models.detect': 'Detect again',
+    'ws.models.test': 'Test embedding',
+    'ws.models.testing': 'Testing…',
+    'ws.models.testOk': '{model} works; {dims}-dimensional vector',
+    'ws.models.testFail': 'Embedding test failed: {detail}',
+    'ws.models.saved': 'Model settings saved',
+  },
+};
+
+mergeDict(CHAT_I18N);

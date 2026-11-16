@@ -1,9 +1,9 @@
 {
-  "name": "@local/dsh-codeslice",
-  "version": "0.1.0",
-  "private": true,
+  "name": "dsh-codeslice",
+  "version": "1.0.0",
+  "private": false,
   "type": "module",
-  "description": "Code reading workbench for DeepSeek Harness: code knowledge graph, symbol index and call graph, shown in the right sidebar next to the conversation.",
+  "description": "Read a codebase as a graph: an AST knowledge graph with calls, inheritance and rationale, symbol navigation, keyword retrieval over Chinese and English, and a note knowledge base with anchor drift detection — beside the conversation.",
   "icon": "icon.svg",
   "engines": {
     "node": ">=22"
@@ -17,11 +17,17 @@
   "files": [
     "index.js",
     "client.js",
+    "client/editor.js",
+    "client/vendor/**",
     "cordis.patch.yml",
     "lib/*.js",
     "locale/*.json",
     "icon.svg",
-    "README.md"
+    "WIRE.md",
+    "WIRE-CHAT.md",
+    "INTERFACES-v3.md",
+    "README.md",
+    "LICENSE"
   ],
   "dsh": {
     "bundle": {
@@ -42,7 +48,15 @@
     "dsh",
     "cordis",
     "code-graph",
-    "symbols"
+    "call-graph",
+    "symbols",
+    "code-reading",
+    "knowledge-graph",
+    "code-notes"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "build:client": "node dev/build-client.mjs",
+    "build:editor": "node dev/build-editor.mjs"
+  }
 }

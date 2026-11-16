@@ -3,7 +3,24 @@
 # ./client.js as the browser half.
 - insert:
     - id: codeslice
-      name: '@local/dsh-codeslice'
+      name: 'dsh-codeslice'
       config:
         maxFiles: 8000
         maxFileBytes: 524288
+        maxDepth: 24
+        cacheTtlMs: 600000
+        superclassJs: true
+        # Desktop parity: the reference app draws every symbol (2.6k nodes on a
+        # real repo), so the conversation view must not collapse the graph into
+        # community bubbles at 600 nodes.
+        maxGraphNodes: 5000
+        maxChunkBytes: 262144
+        # builtin: the desktop's own extractor port. `auto`/`graphify` hands the
+        # build to the graphify CLI, whose vocabulary differs (`file · symbol`
+        # labels) and which does not skip generated bundles — on this repo it
+        # parsed client/editor.js and produced 2932 nodes against the desktop's
+        # 930, so the canvas could never match the reference.
+        graphBackend: builtin
+        graphifyPath: ''
+        graphifyTtlMs: 600000
+        graphifyTimeoutMs: 180000

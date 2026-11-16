@@ -1,27 +1,6 @@
 {
   "meta": {
     "title": "CodeSlice",
-    "description": "Read a codebase as a graph: symbol index, call graph, class hierarchy and file outlines, in the right sidebar next to the conversation."
-  },
-  "panel": {
-    "title": "CodeSlice",
-    "rebuild": "Rebuild",
-    "searchPlaceholder": "Find a symbol or file…",
-    "search": "Search",
-    "loadingGraph": "Loading graph…",
-    "noGraph": "No connected symbols found in this scope.",
-    "noSymbols": "No matching declarations.",
-    "noDeclarations": "No declarations found in this file.",
-    "workspace": "Workspace",
-    "statFiles": "files",
-    "statLines": "lines",
-    "statSymbols": "symbols",
-    "statCalls": "call edges",
-    "working": "Working…"
-  },
-  "chip": {
-    "label": "CodeSlice: {symbols} symbols",
-    "indexing": "CodeSlice: indexing…",
-    "failed": "CodeSlice: unavailable"
+    "description": "Read a codebase as a graph: an AST knowledge graph of calls, inheritance and rationale, symbol navigation, hybrid CJK/English search, and notes bound to code anchors."
   }
 }

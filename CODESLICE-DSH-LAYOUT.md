@@ -15,14 +15,19 @@ ctx.betterSidebar.registerTab(descriptor)        // 侧栏页面（标签）
 ctx.betterSidebar.registerFileViewer(descriptor) // 文件查看器（按扩展名/内容嗅探）
 ```
 
-它自己的 6 个内置标签 + 4 个内置查看器**用的就是同一个 API**。这意味着 CodeSlice 的编辑器、图谱画布、笔记阅读器都可以作为"标签"或"查看器"接进去，**复用它已有的 CodeMirror 编辑器、文件树、tab 管理、分屏、拖拽、快捷键**，而不是把 Monaco 和那 7,175 行 CSS 搬进来。
+它自己的 6 个内置标签 + 4 个内置查看器**用的就是同一个 API**。这意味着 CodeSlice 的编辑器、图谱画布、笔记阅读器都可以作为"标签"或"查看器"接进去。
+
+> **2026-11-13 修订**：用户确认右侧文件窗来自 `dsh-better-sidebar`（不是 DSH 自带），并要求把
+> 原版编辑器实现并入插件、删除旧自绘代码窗；图谱也要与 graphify 原版绘制一致。因此实际落地是
+> **CodeMirror 6 懒加载块** + **本地打包 vis-network 9.1.6**，而不是"完全不自带编辑器/画布"。
+> 下面表格保留当时的评估，作为取舍记录。
 
 推荐布局：
 
 | CodeSlice 原能力 | DSH 落位 | 复用方式 |
 |---|---|---|
-| 代码编辑器（Monaco） | **右侧栏 tag** `codeslice:reader` | 放弃 Monaco，改用 better-sidebar 已有的 CodeMirror |
-| 图谱画布（vis-network） | **右侧栏 tag** `codeslice:graph` | 自渲染，复用 React + 主题令牌 |
+| 代码编辑器（Monaco） | **插件内代码 pane** | 放弃 Monaco，搬入 better-sidebar 同栈的 CodeMirror 6（只读，懒加载） |
+| 图谱画布（vis-network） | **右侧栏 tag** `codeslice:graph` | 直接打包 graphify 的 vis-network 9.1.6，按原版参数渲染 |
 | 笔记知识库 | **右侧栏 tag** `codeslice:notes` | 自渲染，纯展示组件几乎可整体搬 |
 | 文件查看器增强 | **file viewer** `codeslice:annotated` | 包装现有 viewer，叠批注/锚点层 |
 | 侧栏图标入口 | `sidebar.panellist` | 若要独立主面板 |
@@ -177,12 +182,14 @@ ctx.betterSidebar.registerFileViewer({
 
 **① 代码阅读标签** `codeslice:reader`
 - `id: 'codeslice:reader'`，`single: false`，`dedupeKey: tab => tab.path`
-- **不自带编辑器**：组件内只渲染"批注层 + 大纲 + 引用卡片"，代码文本交给宿主
+- **2026-11-13 修订**：不再依赖宿主编辑器；插件内嵌只读 CodeMirror 6 块（懒加载），
+  保留行号选择、批注装饰与「就这段提问」
 - 若确实要独立只读视图：`fetchStrategy: 'fsRead'` 的 file viewer 更合适
 
 **② 图谱标签** `codeslice:graph`
 - `single: true`（一个项目一张图）
-- 画布复用 CodeSlice 的 `GraphCanvas` 逻辑，但把渲染从 vis-network 换掉（原因见 §3.2）
+- **2026-11-13 修订**：直接复用 graphify 的 vis-network 9.1.6（本地打包），按原版参数渲染；
+  不再自绘替代
 - `visible === false` 时必须暂停布局与轮询
 
 **③ 笔记标签** `codeslice:notes`
@@ -232,7 +239,8 @@ ctx.slots.inject('conversation.composer.dock', () =>
 | 项 | 原因 | 工作量 |
 |---|---|---|
 | **CSS 全部作用域化** | `base.css` 等有裸元素选择器（`button`/`input`/`a`/`code`）、`:root` 变量、`body{overflow:hidden}`、全局 `::-webkit-scrollbar`、`@media(prefers-reduced-motion)` 下的 `*,*::before,*::after{...!important}` → 直挂会污染宿主 | 大 |
-| **Monaco → CodeMirror** | 若走 better-sidebar 的编辑器；Monaco 体积 ~5MB 且会抢全局快捷键 | 中 |
+| **Monaco → CodeMirror** | 实际采用 CodeMirror 6（懒加载块）；Monaco 体积 ~5MB 且会抢全局快捷键 | 已完成 |
+| **vis-network 打包** | 实际直接打包 graphify 的 9.1.6（~700KB），换取与原版一致的布局/样式；代价是 client 资产变大 | 已完成 |
 | **vis-network → 替代方案** | better-sidebar 已依赖 d3 + cytoscape（`d3-force` / `cytoscape-cose-bilkent` 都在 profile 里），复用它们比引入 vis-network 更省 | 中 |
 | **`bridge.ts` → 宿主能力** | `window.codeslice` 的 8 个成员全部删除：`pickFolder` → `ctx.uiWorkspace.pickDirectory()`，`openExternal` → 宿主链接策略，窗口控制 → 无概念 | 小 |
 | **`AppState.tsx`** | 596 行单 Context 全量广播；在插件里只需保留"当前项目 / 当前标签 / 选区"三个状态 | 中 |
@@ -371,7 +379,7 @@ DSH 插件 ────stdio──────┘
 
 ## 6. 一句话总结
 
-**布局放右侧栏多标签，编辑器用 `dsh-better-sidebar` 已有的，CodeSlice 只贡献它在 DSH 里没有的东西（图谱、笔记、批注、语义检索）。** 不要搬 Monaco + vis-network + 7,175 行 CSS，那是把两个成熟系统的重复部分叠加，而不是互补。
+**布局放右侧栏多标签，编辑器/图谱按用户拍板在原版实现上移植：CodeMirror 6 只读块 + graphify 的 vis-network 9.1.6；CodeSlice 只贡献它在 DSH 里没有的东西（图谱、笔记、批注、语义检索）。** 不搬 Monaco；vis-network 的打包换来了与 graphify 原版一致的绘制。
 
 三个标签（reader / graph / notes）+ 一个查看器（annotated）+ 一个 composer 提示条，就是完整形态。
 

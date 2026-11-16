@@ -1,27 +1,6 @@
 {
   "meta": {
     "title": "CodeSlice",
-    "description": "以图谱的方式阅读代码库：符号索引、调用图、类继承关系和文件大纲，显示在对话右侧的侧栏里。"
-  },
-  "panel": {
-    "title": "CodeSlice",
-    "rebuild": "重建索引",
-    "searchPlaceholder": "查找符号或文件…",
-    "search": "搜索",
-    "loadingGraph": "正在加载图谱…",
-    "noGraph": "当前范围内没有找到有关联的符号。",
-    "noSymbols": "没有匹配的声明。",
-    "noDeclarations": "此文件中没有找到声明。",
-    "workspace": "工作区",
-    "statFiles": "文件",
-    "statLines": "行",
-    "statSymbols": "符号",
-    "statCalls": "调用边",
-    "working": "处理中…"
-  },
-  "chip": {
-    "label": "CodeSlice：{symbols} 个符号",
-    "indexing": "CodeSlice：正在建立索引…",
-    "failed": "CodeSlice：不可用"
+    "description": "以图谱的方式阅读代码库：AST 知识图谱（调用、继承、说明）、符号导航、中英混合检索，以及与代码锚点绑定的笔记库。"
   }
 }
