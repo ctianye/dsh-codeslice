@@ -246,6 +246,19 @@ export const WORKBENCH_CSS = `
 .wb-folder-row:hover { background: var(--dsw-alias-bg-layer-1); }
 .wb-folder-row.wb-on { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2); }
 
+/* Unfiled notes sit after the folder tree, matching the desktop library. */
+.wb-notes-divider {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 4px 2px;
+  padding: 6px 4px 3px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-secondary);
+}
+
 .wb-note-row {
   display: flex;
   flex-direction: column;

@@ -1,6 +1,6 @@
 {
   "name": "dsh-codeslice",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": false,
   "type": "module",
   "description": "Read a codebase as a graph: an AST knowledge graph with calls, inheritance and rationale, symbol navigation, keyword retrieval over Chinese and English, and a note knowledge base with anchor drift detection — beside the conversation.",
@@ -32,6 +32,7 @@
     "lib/*.js",
     "locale/*.json",
     "icon.svg",
+    "screenshots/*.png",
     "WIRE.md",
     "WIRE-CHAT.md",
     "INTERFACES-v3.md",

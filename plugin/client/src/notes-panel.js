@@ -423,9 +423,10 @@ export function NotesPanel(props) {
     () => (searching ? filterNotes(notes, query, undefined) : []),
     [notes, query, searching],
   );
+  const visibleNotes = searching ? searchResults : notes;
   const notesOf = useCallback(
-    (id) => notes.filter((row) => (row.folderId ?? undefined) === id),
-    [notes],
+    (id) => visibleNotes.filter((row) => (row.folderId ?? undefined) === id),
+    [visibleNotes],
   );
 
   // Reading or editing one note takes the whole panel: a long list above a
@@ -464,10 +465,28 @@ export function NotesPanel(props) {
       title: row.title,
       onClick: () => { void open(row.id); },
     },
+    h('span', { className: 'cs-note-icon' }, Glyph.notes(12)),
     h('span', { className: 'cs-note-main' },
       h('span', { className: 'cs-note-title' }, row.title),
       h('span', { className: 'cs-note-excerpt' }, row.excerpt ?? '')),
-    h('span', { className: 'cs-note-time' }, formatRelative(locale, row.updatedAt))));
+    h('span', { className: 'cs-note-time' }, formatRelative(locale, row.updatedAt))),
+    // Desktop keeps per-row actions on hover; right-click stays as the fast path.
+    h('button', {
+      type: 'button',
+      className: 'cs-note-more',
+      title: t('notes.more'),
+      'aria-label': t('notes.more'),
+      onClick: (event) => {
+        event.stopPropagation();
+        const rect = event.currentTarget.getBoundingClientRect();
+        setMenu({
+          x: Math.max(8, rect.right - 160),
+          y: Math.min(rect.bottom + 2, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : 800) - 120)),
+          id: row.id,
+          title: row.title,
+        });
+      },
+    }, Glyph.more(14)));
   };
 
   /**
@@ -476,6 +495,14 @@ export function NotesPanel(props) {
    * indentation (`6 + depth*14`) mirrors the reference's file-tree behaviour.
    */
   const renderFolders = (rows, depth) => (rows ?? []).map((folder) => {
+    const kids = Array.isArray(folder.children) ? folder.children : [];
+    const files = notesOf(folder.id);
+    const childRows = renderFolders(kids, depth + 1);
+    // Search keeps the tree instead of flattening it: a folder survives when it
+    // has a matching note, a matching descendant, or a matching name.
+    const nameHit = folder.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());
+    if (searching && childRows.length === 0 && files.length === 0 && !nameHit) return null;
+
     const isOpen = searching || openFolders.has(folder.id);
     const editing = renaming !== undefined && renaming.id === folder.id;
     const asking = confirming === folder.id;
@@ -576,16 +603,14 @@ export function NotesPanel(props) {
             onClick: () => setConfirming(folder.id),
           }, Glyph.trash(11))));
     }
-    const kids = Array.isArray(folder.children) ? folder.children : [];
-    const files = notesOf(folder.id);
     return h('div', { key: folder.id, className: 'cs-folder-node' },
       row,
-      isOpen && (kids.length > 0 || files.length > 0)
+      isOpen && (childRows.length > 0 || files.length > 0)
         ? h('div', { className: 'cs-folder-children' },
-          renderFolders(kids, depth + 1),
+          childRows,
           files.map((item) => renderNoteRow(item, depth + 1)))
         : null);
-  });
+  }).filter((node) => node !== null);
 
   const openCitation = useCallback((path, startLine, endLine) => {
     const start = Math.max(1, Math.trunc(Number(startLine) || 1));
@@ -601,6 +626,11 @@ export function NotesPanel(props) {
   }, [ctx, cwd, scope, onOpenFile]);
 
   /* ---- render ---- */
+
+  // Desktop order: folders first, unfiled notes last. Rendering the unfiled pile
+  // above the folders made every note look detached from the tree.
+  const folderRows = renderFolders(folders, 0);
+  const unfiledRows = notesOf(undefined);
 
   return h('div', { className: 'cs-root', ref: hostRef },
     h('div', { className: 'cs-bar cs-wrap' },
@@ -624,6 +654,17 @@ export function NotesPanel(props) {
         }, Glyph.close(12)) : null),
       h('button', {
         type: 'button',
+        className: 'cs-iconbtn',
+        title: t('common.refresh'),
+        'aria-label': t('common.refresh'),
+        onClick: () => { void refresh(); },
+      }, Glyph.refresh(14))),
+
+    // Labels, not bare glyphs: the four file actions are not self-evident from
+    // an icon alone, and this rail has enough width for one compact row.
+    h('div', { className: 'cs-bar cs-wrap cs-notes-actions' },
+      h('button', {
+        type: 'button',
         className: 'cs-btn cs-small',
         disabled: busy,
         onClick: () => setMode({ kind: 'create' }),
@@ -638,14 +679,12 @@ export function NotesPanel(props) {
         type: 'button',
         className: 'cs-btn cs-small',
         disabled: busy || importBusy,
-        title: t('notes.import'),
         onClick: () => setImportOpen((open) => !open),
       }, Glyph.file(12), t('notes.import')),
       h('button', {
         type: 'button',
         className: `cs-btn cs-small${exportMode ? ' cs-on' : ''}`,
         disabled: busy,
-        title: t('notes.export'),
         'aria-pressed': exportMode ? 'true' : 'false',
         onClick: () => {
           setExportMode((open) => {
@@ -658,16 +697,8 @@ export function NotesPanel(props) {
         type: 'button',
         className: 'cs-btn cs-small',
         disabled: busy,
-        title: t('notes.exportAll'),
         onClick: () => { void exportMany(undefined); },
-      }, Glyph.open(12), t('notes.exportAll')),
-      h('button', {
-        type: 'button',
-        className: 'cs-iconbtn',
-        title: t('common.refresh'),
-        'aria-label': t('common.refresh'),
-        onClick: () => { void refresh(); },
-      }, Glyph.refresh(14))),
+      }, Glyph.open(12), t('notes.exportAll'))),
 
     importOpen ? h('div', { className: 'cs-bar cs-wrap', style: { gap: '6px' } },
       h('input', {
@@ -748,27 +779,36 @@ export function NotesPanel(props) {
           h('button', {
             type: 'button',
             className: `cs-folder${folderId === undefined ? ' cs-active' : ''}`,
+            title: t('notes.library'),
             onClick: () => setFolderId(undefined),
           },
           h('span', { className: 'cs-twist' }, Glyph.layers(12)),
-          h('span', { className: 'cs-grow' }, t('notes.root')),
+          h('span', { className: 'cs-grow' }, t('notes.library')),
           h('span', { className: 'cs-count' }, formatInt(notes.length, locale)))),
 
-        // One tree, like a file explorer: 全部笔记 holds the unfiled notes and the
-        // folders, and every folder holds its subfolders plus its own notes. A
-        // search swaps the tree for a flat result list.
-        h('div', { className: 'cs-grow', style: { minHeight: 0, overflow: 'auto', marginTop: '2px' } },
+        // One tree, like a file explorer: folders first, each holding its
+        // subfolders and notes; unfiled notes come last. Search filters the same
+        // tree instead of flattening the hierarchy away.
+        h('div', { className: 'cs-grow', style: { minHeight: 0, overflow: 'auto', marginTop: '2px', paddingBottom: '10px' } },
           loading && notes.length === 0
             ? h('div', { className: 'cs-empty' }, t('common.loading'))
             : searching
-              ? (searchResults.length === 0
+              ? (folderRows.length === 0 && unfiledRows.length === 0
                 ? h('div', { className: 'cs-empty', style: { height: 'auto', padding: '16px 10px' } }, t('notes.emptySearch'))
-                : h('div', { className: 'cs-folder-tree' }, searchResults.map((row) => renderNoteRow(row, 0))))
-              : (notes.length === 0
+                : h('div', { className: 'cs-folder-tree', 'data-cs': 'notes-tree' },
+                  folderRows,
+                  unfiledRows.length === 0 ? null : h('div', { className: 'cs-tree-divider' },
+                    h('span', { className: 'cs-grow' }, t('notes.folder.unfiled')),
+                    h('span', { className: 'cs-count' }, formatInt(unfiledRows.length, locale))),
+                  unfiledRows.map((row) => renderNoteRow(row, 0))))
+              : (notes.length === 0 && folders.length === 0
                 ? h('div', { className: 'cs-empty', style: { height: 'auto', padding: '16px 10px' } }, t('notes.empty'))
-                : h('div', { className: 'cs-folder-tree' },
-                  notesOf(undefined).map((row) => renderNoteRow(row, 0)),
-                  renderFolders(folders, 0))))),
+                : h('div', { className: 'cs-folder-tree', 'data-cs': 'notes-tree' },
+                  folderRows,
+                  unfiledRows.length === 0 ? null : h('div', { className: 'cs-tree-divider' },
+                    h('span', { className: 'cs-grow' }, t('notes.folder.unfiled')),
+                    h('span', { className: 'cs-count' }, formatInt(unfiledRows.length, locale))),
+                  unfiledRows.map((row) => renderNoteRow(row, 0)))))),
 
       /* ---- column 2: editor or reader ---- */
       h('div', { className: 'cs-notes-reader' },

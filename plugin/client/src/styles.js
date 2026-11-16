@@ -467,9 +467,17 @@ export const CSS = `
   flex: 0 0 auto; max-height: 46%; border-right: none;
   border-bottom: 1px solid var(--dsw-alias-border-l1);
 }
+.cs-notes-actions { padding-top: 0; padding-bottom: 3px; gap: 6px; }
+.cs-notes-actions .cs-btn { flex: 0 0 auto; }
 /* One note open: the reader owns the panel, the list comes back via its back arrow. */
 .cs-notes.cs-focus .cs-notes-list { display: none; }
 .cs-notes.cs-focus .cs-notes-reader { flex: 1 1 auto; }
+/* Browsing: the tree owns the whole panel. Leaving an empty reader underneath
+   it clipped the list at 46% in a narrow rail and left a blank half-panel. */
+.cs-notes:not(.cs-focus) .cs-notes-list {
+  flex: 1 1 auto; max-height: none; border-right: none; border-bottom: none;
+}
+.cs-notes:not(.cs-focus) .cs-notes-reader { display: none; }
 .cs-notes-reader { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
 /* One list row: checkbox for batch export + the row button itself. */
@@ -477,6 +485,24 @@ export const CSS = `
 .cs-note-item.cs-active { background: var(--dsw-alias-bg-layer-2); }
 .cs-note-item .cs-note-row { flex: 1 1 auto; min-width: 0; }
 .cs-note-item .cs-note-row.cs-active { background: transparent; }
+.cs-note-item .cs-note-more {
+  flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; padding: 0; border: none; border-radius: 4px;
+  background: transparent; color: var(--dsw-alias-label-secondary);
+  opacity: 0; cursor: pointer;
+}
+.cs-note-item:hover .cs-note-more,
+.cs-note-item:focus-within .cs-note-more { opacity: 1; }
+.cs-note-item .cs-note-more:hover { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); }
+.cs-note-icon { flex: 0 0 auto; display: flex; padding-top: 1px; color: var(--dsw-alias-label-secondary); }
+.cs-tree-divider {
+  display: flex; align-items: center; gap: 6px;
+  margin: 6px 4px 2px; padding: 5px 4px 3px;
+  border-top: 1px solid var(--dsw-alias-border-l1);
+  font-size: 10px; font-weight: 600; letter-spacing: .02em;
+  color: var(--dsw-alias-label-secondary);
+}
+.cs-tree-divider .cs-count { font-weight: 400; font-variant-numeric: tabular-nums; }
 .cs-note-check {
   flex: 0 0 auto; margin: 0 0 0 6px; width: 12px; height: 12px;
   accent-color: var(--dsw-alias-brand-primary, #2f6fed); cursor: pointer;
@@ -497,7 +523,7 @@ export const CSS = `
   font: inherit; font-size: 11.5px; color: inherit; min-width: 0;
 }
 .cs-folder:hover { background: var(--dsw-alias-bg-layer-1); }
-.cs-folder.cs-active { background: var(--dsw-alias-bg-layer-2); }
+.cs-folder.cs-active { background: var(--dsw-alias-bg-layer-2); box-shadow: inset 2px 0 var(--dsw-alias-brand-primary); }
 .cs-folder .cs-twist {
   display: flex; flex: 0 0 auto; width: 14px; justify-content: center;
   color: var(--dsw-alias-label-secondary);

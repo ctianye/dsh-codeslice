@@ -103,6 +103,11 @@ window.__ModuleLoader__.load({
         h('path', { key: 'b', d: 'M16 16l4.5 4.5' }),
       ]),
       close: (size) => frame(size, [h('path', { key: 'a', d: 'M6 6l12 12M18 6L6 18' })]),
+      more: (size) => frame(size, [
+        h('circle', { key: 'a', cx: 5, cy: 12, r: 1.4 }),
+        h('circle', { key: 'b', cx: 12, cy: 12, r: 1.4 }),
+        h('circle', { key: 'c', cx: 19, cy: 12, r: 1.4 }),
+      ]),
       refresh: (size) => frame(size, [
         h('path', { key: 'a', d: 'M20 12a8 8 0 1 1-2.6-5.9' }),
         h('path', { key: 'b', d: 'M20 4.5V10h-5.5' }),
@@ -553,6 +558,8 @@ window.__ModuleLoader__.load({
         'notes.emptySearch': '没有匹配的笔记。',
         'notes.clearSearch': '清除搜索',
         'notes.root': '全部笔记',
+        'notes.library': '知识库',
+        'notes.more': '更多操作',
         'notes.count': '{count} 条',
         'notes.folder.name': '文件夹名称',
         'notes.folder.create': '创建',
@@ -765,6 +772,8 @@ window.__ModuleLoader__.load({
         'notes.emptySearch': 'No matching note.',
         'notes.clearSearch': 'Clear the search',
         'notes.root': 'All notes',
+        'notes.library': 'Knowledge base',
+        'notes.more': 'More actions',
         'notes.count': '{count}',
         'notes.folder.name': 'Folder name',
         'notes.folder.create': 'Create',
@@ -9468,9 +9477,17 @@ window.__ModuleLoader__.load({
       flex: 0 0 auto; max-height: 46%; border-right: none;
       border-bottom: 1px solid var(--dsw-alias-border-l1);
     }
+    .cs-notes-actions { padding-top: 0; padding-bottom: 3px; gap: 6px; }
+    .cs-notes-actions .cs-btn { flex: 0 0 auto; }
     /* One note open: the reader owns the panel, the list comes back via its back arrow. */
     .cs-notes.cs-focus .cs-notes-list { display: none; }
     .cs-notes.cs-focus .cs-notes-reader { flex: 1 1 auto; }
+    /* Browsing: the tree owns the whole panel. Leaving an empty reader underneath
+       it clipped the list at 46% in a narrow rail and left a blank half-panel. */
+    .cs-notes:not(.cs-focus) .cs-notes-list {
+      flex: 1 1 auto; max-height: none; border-right: none; border-bottom: none;
+    }
+    .cs-notes:not(.cs-focus) .cs-notes-reader { display: none; }
     .cs-notes-reader { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
     /* One list row: checkbox for batch export + the row button itself. */
@@ -9478,6 +9495,24 @@ window.__ModuleLoader__.load({
     .cs-note-item.cs-active { background: var(--dsw-alias-bg-layer-2); }
     .cs-note-item .cs-note-row { flex: 1 1 auto; min-width: 0; }
     .cs-note-item .cs-note-row.cs-active { background: transparent; }
+    .cs-note-item .cs-note-more {
+      flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; padding: 0; border: none; border-radius: 4px;
+      background: transparent; color: var(--dsw-alias-label-secondary);
+      opacity: 0; cursor: pointer;
+    }
+    .cs-note-item:hover .cs-note-more,
+    .cs-note-item:focus-within .cs-note-more { opacity: 1; }
+    .cs-note-item .cs-note-more:hover { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); }
+    .cs-note-icon { flex: 0 0 auto; display: flex; padding-top: 1px; color: var(--dsw-alias-label-secondary); }
+    .cs-tree-divider {
+      display: flex; align-items: center; gap: 6px;
+      margin: 6px 4px 2px; padding: 5px 4px 3px;
+      border-top: 1px solid var(--dsw-alias-border-l1);
+      font-size: 10px; font-weight: 600; letter-spacing: .02em;
+      color: var(--dsw-alias-label-secondary);
+    }
+    .cs-tree-divider .cs-count { font-weight: 400; font-variant-numeric: tabular-nums; }
     .cs-note-check {
       flex: 0 0 auto; margin: 0 0 0 6px; width: 12px; height: 12px;
       accent-color: var(--dsw-alias-brand-primary, #2f6fed); cursor: pointer;
@@ -9498,7 +9533,7 @@ window.__ModuleLoader__.load({
       font: inherit; font-size: 11.5px; color: inherit; min-width: 0;
     }
     .cs-folder:hover { background: var(--dsw-alias-bg-layer-1); }
-    .cs-folder.cs-active { background: var(--dsw-alias-bg-layer-2); }
+    .cs-folder.cs-active { background: var(--dsw-alias-bg-layer-2); box-shadow: inset 2px 0 var(--dsw-alias-brand-primary); }
     .cs-folder .cs-twist {
       display: flex; flex: 0 0 auto; width: 14px; justify-content: center;
       color: var(--dsw-alias-label-secondary);
@@ -10735,9 +10770,10 @@ window.__ModuleLoader__.load({
         () => (searching ? filterNotes(notes, query, undefined) : []),
         [notes, query, searching],
       );
+      const visibleNotes = searching ? searchResults : notes;
       const notesOf = useCallback(
-        (id) => notes.filter((row) => (row.folderId ?? undefined) === id),
-        [notes],
+        (id) => visibleNotes.filter((row) => (row.folderId ?? undefined) === id),
+        [visibleNotes],
       );
 
       // Reading or editing one note takes the whole panel: a long list above a
@@ -10776,10 +10812,28 @@ window.__ModuleLoader__.load({
           title: row.title,
           onClick: () => { void open(row.id); },
         },
+        h('span', { className: 'cs-note-icon' }, Glyph.notes(12)),
         h('span', { className: 'cs-note-main' },
           h('span', { className: 'cs-note-title' }, row.title),
           h('span', { className: 'cs-note-excerpt' }, row.excerpt ?? '')),
-        h('span', { className: 'cs-note-time' }, formatRelative(locale, row.updatedAt))));
+        h('span', { className: 'cs-note-time' }, formatRelative(locale, row.updatedAt))),
+        // Desktop keeps per-row actions on hover; right-click stays as the fast path.
+        h('button', {
+          type: 'button',
+          className: 'cs-note-more',
+          title: t('notes.more'),
+          'aria-label': t('notes.more'),
+          onClick: (event) => {
+            event.stopPropagation();
+            const rect = event.currentTarget.getBoundingClientRect();
+            setMenu({
+              x: Math.max(8, rect.right - 160),
+              y: Math.min(rect.bottom + 2, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : 800) - 120)),
+              id: row.id,
+              title: row.title,
+            });
+          },
+        }, Glyph.more(14)));
       };
 
       /**
@@ -10788,6 +10842,14 @@ window.__ModuleLoader__.load({
        * indentation (`6 + depth*14`) mirrors the reference's file-tree behaviour.
        */
       const renderFolders = (rows, depth) => (rows ?? []).map((folder) => {
+        const kids = Array.isArray(folder.children) ? folder.children : [];
+        const files = notesOf(folder.id);
+        const childRows = renderFolders(kids, depth + 1);
+        // Search keeps the tree instead of flattening it: a folder survives when it
+        // has a matching note, a matching descendant, or a matching name.
+        const nameHit = folder.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());
+        if (searching && childRows.length === 0 && files.length === 0 && !nameHit) return null;
+
         const isOpen = searching || openFolders.has(folder.id);
         const editing = renaming !== undefined && renaming.id === folder.id;
         const asking = confirming === folder.id;
@@ -10888,16 +10950,14 @@ window.__ModuleLoader__.load({
                 onClick: () => setConfirming(folder.id),
               }, Glyph.trash(11))));
         }
-        const kids = Array.isArray(folder.children) ? folder.children : [];
-        const files = notesOf(folder.id);
         return h('div', { key: folder.id, className: 'cs-folder-node' },
           row,
-          isOpen && (kids.length > 0 || files.length > 0)
+          isOpen && (childRows.length > 0 || files.length > 0)
             ? h('div', { className: 'cs-folder-children' },
-              renderFolders(kids, depth + 1),
+              childRows,
               files.map((item) => renderNoteRow(item, depth + 1)))
             : null);
-      });
+      }).filter((node) => node !== null);
 
       const openCitation = useCallback((path, startLine, endLine) => {
         const start = Math.max(1, Math.trunc(Number(startLine) || 1));
@@ -10913,6 +10973,11 @@ window.__ModuleLoader__.load({
       }, [ctx, cwd, scope, onOpenFile]);
 
       /* ---- render ---- */
+
+      // Desktop order: folders first, unfiled notes last. Rendering the unfiled pile
+      // above the folders made every note look detached from the tree.
+      const folderRows = renderFolders(folders, 0);
+      const unfiledRows = notesOf(undefined);
 
       return h('div', { className: 'cs-root', ref: hostRef },
         h('div', { className: 'cs-bar cs-wrap' },
@@ -10936,6 +11001,17 @@ window.__ModuleLoader__.load({
             }, Glyph.close(12)) : null),
           h('button', {
             type: 'button',
+            className: 'cs-iconbtn',
+            title: t('common.refresh'),
+            'aria-label': t('common.refresh'),
+            onClick: () => { void refresh(); },
+          }, Glyph.refresh(14))),
+
+        // Labels, not bare glyphs: the four file actions are not self-evident from
+        // an icon alone, and this rail has enough width for one compact row.
+        h('div', { className: 'cs-bar cs-wrap cs-notes-actions' },
+          h('button', {
+            type: 'button',
             className: 'cs-btn cs-small',
             disabled: busy,
             onClick: () => setMode({ kind: 'create' }),
@@ -10950,14 +11026,12 @@ window.__ModuleLoader__.load({
             type: 'button',
             className: 'cs-btn cs-small',
             disabled: busy || importBusy,
-            title: t('notes.import'),
             onClick: () => setImportOpen((open) => !open),
           }, Glyph.file(12), t('notes.import')),
           h('button', {
             type: 'button',
             className: `cs-btn cs-small${exportMode ? ' cs-on' : ''}`,
             disabled: busy,
-            title: t('notes.export'),
             'aria-pressed': exportMode ? 'true' : 'false',
             onClick: () => {
               setExportMode((open) => {
@@ -10970,16 +11044,8 @@ window.__ModuleLoader__.load({
             type: 'button',
             className: 'cs-btn cs-small',
             disabled: busy,
-            title: t('notes.exportAll'),
             onClick: () => { void exportMany(undefined); },
-          }, Glyph.open(12), t('notes.exportAll')),
-          h('button', {
-            type: 'button',
-            className: 'cs-iconbtn',
-            title: t('common.refresh'),
-            'aria-label': t('common.refresh'),
-            onClick: () => { void refresh(); },
-          }, Glyph.refresh(14))),
+          }, Glyph.open(12), t('notes.exportAll'))),
 
         importOpen ? h('div', { className: 'cs-bar cs-wrap', style: { gap: '6px' } },
           h('input', {
@@ -11060,27 +11126,36 @@ window.__ModuleLoader__.load({
               h('button', {
                 type: 'button',
                 className: `cs-folder${folderId === undefined ? ' cs-active' : ''}`,
+                title: t('notes.library'),
                 onClick: () => setFolderId(undefined),
               },
               h('span', { className: 'cs-twist' }, Glyph.layers(12)),
-              h('span', { className: 'cs-grow' }, t('notes.root')),
+              h('span', { className: 'cs-grow' }, t('notes.library')),
               h('span', { className: 'cs-count' }, formatInt(notes.length, locale)))),
 
-            // One tree, like a file explorer: 全部笔记 holds the unfiled notes and the
-            // folders, and every folder holds its subfolders plus its own notes. A
-            // search swaps the tree for a flat result list.
-            h('div', { className: 'cs-grow', style: { minHeight: 0, overflow: 'auto', marginTop: '2px' } },
+            // One tree, like a file explorer: folders first, each holding its
+            // subfolders and notes; unfiled notes come last. Search filters the same
+            // tree instead of flattening the hierarchy away.
+            h('div', { className: 'cs-grow', style: { minHeight: 0, overflow: 'auto', marginTop: '2px', paddingBottom: '10px' } },
               loading && notes.length === 0
                 ? h('div', { className: 'cs-empty' }, t('common.loading'))
                 : searching
-                  ? (searchResults.length === 0
+                  ? (folderRows.length === 0 && unfiledRows.length === 0
                     ? h('div', { className: 'cs-empty', style: { height: 'auto', padding: '16px 10px' } }, t('notes.emptySearch'))
-                    : h('div', { className: 'cs-folder-tree' }, searchResults.map((row) => renderNoteRow(row, 0))))
-                  : (notes.length === 0
+                    : h('div', { className: 'cs-folder-tree', 'data-cs': 'notes-tree' },
+                      folderRows,
+                      unfiledRows.length === 0 ? null : h('div', { className: 'cs-tree-divider' },
+                        h('span', { className: 'cs-grow' }, t('notes.folder.unfiled')),
+                        h('span', { className: 'cs-count' }, formatInt(unfiledRows.length, locale))),
+                      unfiledRows.map((row) => renderNoteRow(row, 0))))
+                  : (notes.length === 0 && folders.length === 0
                     ? h('div', { className: 'cs-empty', style: { height: 'auto', padding: '16px 10px' } }, t('notes.empty'))
-                    : h('div', { className: 'cs-folder-tree' },
-                      notesOf(undefined).map((row) => renderNoteRow(row, 0)),
-                      renderFolders(folders, 0))))),
+                    : h('div', { className: 'cs-folder-tree', 'data-cs': 'notes-tree' },
+                      folderRows,
+                      unfiledRows.length === 0 ? null : h('div', { className: 'cs-tree-divider' },
+                        h('span', { className: 'cs-grow' }, t('notes.folder.unfiled')),
+                        h('span', { className: 'cs-count' }, formatInt(unfiledRows.length, locale))),
+                      unfiledRows.map((row) => renderNoteRow(row, 0)))))),
 
           /* ---- column 2: editor or reader ---- */
           h('div', { className: 'cs-notes-reader' },
@@ -14149,6 +14224,19 @@ window.__ModuleLoader__.load({
     .wb-folder-row:hover { background: var(--dsw-alias-bg-layer-1); }
     .wb-folder-row.wb-on { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2); }
 
+    /* Unfiled notes sit after the folder tree, matching the desktop library. */
+    .wb-notes-divider {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 6px 4px 2px;
+      padding: 6px 4px 3px;
+      border-top: 1px solid var(--dsw-alias-border-l1);
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--dsw-alias-label-secondary);
+    }
+
     .wb-note-row {
       display: flex;
       flex-direction: column;
@@ -16229,27 +16317,32 @@ window.__ModuleLoader__.load({
         });
       }, [folders]);
 
-      const groups = useMemo(() => wbNoteGroups(folders, notes), [folders, notes]);
-      // Only a search flattens the list. Selecting a folder used to flip the whole
-      // page into a filtered flat list, which dropped the tree the moment you
-      // clicked a folder name — Explorer keeps the tree and just selects the node.
-      const flatMode = searching;
+      const viewGroups = useMemo(() => wbNoteGroups(folders, visibleNotes), [folders, visibleNotes]);
+      // Search keeps the folder tree and only drops folders with no surviving note,
+      // matching the right-rail library and the desktop reference.
       const listRows = useMemo(() => {
-        if (flatMode) return visibleNotes.map((row) => ({ kind: 'note', row, depth: 0 }));
-        const out = [];
-        const walk = (nodes, depth) => {
+        const needle = query.trim().toLowerCase();
+        const buildRows = (nodes, depth) => {
+          const rows = [];
           for (const node of nodes) {
-            const open = expanded.has(node.folder.id);
-            out.push({ kind: 'folder', folder: node.folder, depth, count: node.notes.length, open });
+            const childRows = buildRows(node.children, depth + 1);
+            const nameHit = needle !== '' && node.folder.name.toLocaleLowerCase().includes(needle);
+            if (needle !== '' && node.notes.length === 0 && childRows.length === 0 && !nameHit) continue;
+            const open = searching || expanded.has(node.folder.id);
+            rows.push({ kind: 'folder', folder: node.folder, depth, count: node.notes.length, open });
             if (!open) continue;
-            for (const row of node.notes) out.push({ kind: 'note', row, depth: depth + 1 });
-            walk(node.children, depth + 1);
+            rows.push(...childRows);
+            for (const row of node.notes) rows.push({ kind: 'note', row, depth: depth + 1 });
           }
+          return rows;
         };
-        for (const row of groups.loose) out.push({ kind: 'note', row, depth: 0 });
-        walk(groups.tree, 0);
-        return out;
-      }, [flatMode, visibleNotes, groups, expanded]);
+        const rows = buildRows(viewGroups.tree, 0);
+        if (viewGroups.loose.length > 0) {
+          rows.push({ kind: 'divider', count: viewGroups.loose.length });
+          for (const row of viewGroups.loose) rows.push({ kind: 'note', row, depth: 0 });
+        }
+        return rows;
+      }, [viewGroups, expanded, searching, query]);
 
       const toggleExpanded = useCallback((id) => {
         setExpanded((current) => {
@@ -16370,7 +16463,7 @@ window.__ModuleLoader__.load({
               type: 'button',
               className: `wb-folder-row${folderId === undefined ? ' wb-on' : ''}`,
               onClick: () => setFolderId(undefined),
-            }, Glyph.layers(12), h('span', { style: { flex: '1 1 auto' } }, t('wb.notes.root')),
+            }, Glyph.layers(12), h('span', { style: { flex: '1 1 auto' } }, t('notes.library')),
               h('span', { className: 'wb-note-time' }, formatInt(notes.length, locale))),
             loading && notes.length === 0
               ? h('div', { className: 'wb-empty' }, t('wb.notes.loading'))
@@ -16378,6 +16471,11 @@ window.__ModuleLoader__.load({
                 ? h('div', { className: 'wb-empty' },
                   h('p', null, searching ? t('notes.emptySearch') : notes.length === 0 ? t('wb.notes.empty') : t('notes.list.empty')))
                 : listRows.map((entry) => {
+                  if (entry.kind === 'divider') {
+                    return h('div', { key: 'divider', className: 'wb-notes-divider' },
+                      h('span', { style: { flex: '1 1 auto' } }, t('notes.folder.unfiled')),
+                      h('span', { className: 'wb-note-time' }, formatInt(entry.count, locale)));
+                  }
                   if (entry.kind === 'folder') {
                     return h('div', {
                       key: `f-${entry.folder.id}`,

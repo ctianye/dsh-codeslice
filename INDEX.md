@@ -1,7 +1,7 @@
 # CODESLICE → DSH 插件：项目索引（续接入口）
 
 > **这份文件是续接入口。** 对话被压缩后先读这份，再按需跳转到 §4 的详细文档。
-> 更新：2026-11-12 ｜ 插件 v1.0.0（重构完成，已通过两半验证与独立审核）
+> 更新：2026-11-12 ｜ 插件 v0.1.0（重构完成，已通过两半验证与独立审核）
 >
 > **2026-11-12 深夜架构调整**：插件不再自带右侧栏对话工作台。左侧新增 CodeSlice 主面板，
 > 正常 DSH 对话的输入框上方注册引用条；「就这段提问/就此提问」通过 `inputActions` 写进宿主对话；
@@ -13,7 +13,7 @@
 ## 1. 一句话现状
 
 已把 `D:\CodeSplit`（**产品名 CodeSlice**，桌面版 0.2.x）的差异化能力重建成一个 DSH 插件
-（`plugin/`，`dsh-codeslice` v1.0.0）。**v0.2.0 的旧实现已被完全重写**——它不是可以打补丁
+（`plugin/`，`dsh-codeslice` v0.1.0）。**v0.2.0 的旧实现已被完全重写**——它不是可以打补丁
 的基础，而是一个残缺的近似品（无节点 id、无关系、无说明节点、无社区、无笔记、无检索）。
 
 审查是纯只读的，`D:\CodeSplit` 下**未修改任何文件**，插件也**不 import 它**：移植的是算法与交互
@@ -28,7 +28,7 @@
 | 项 | 值 |
 |---|---|
 | 参考项目 | `D:\CodeSplit`（目录名 CodeSplit，**产品名 CodeSlice**） |
-| 插件位置 | `D:\dsh-CodeSlice\plugin`，包名 `dsh-codeslice` v1.0.0（本地开发时 profile 仍可 `link:`） |
+| 插件位置 | `D:\dsh-CodeSlice\plugin`，包名 `dsh-codeslice` v0.1.0（本地开发时 profile 仍可 `link:`） |
 | DSH profile | `desktop` → `C:\Users\cheng\.dsh\profiles\desktop`（已 `link:` 引用并进 `bundles`） |
 | 技术栈 | 纯 Node ESM，**零运行时依赖**；Host 半 + 浏览器半 |
 | 工作目录（可写） | `D:\dsh-CodeSlice` |

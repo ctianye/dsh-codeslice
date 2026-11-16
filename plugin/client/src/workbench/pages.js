@@ -608,27 +608,32 @@ export function WbNoteLibrary(props) {
     });
   }, [folders]);
 
-  const groups = useMemo(() => wbNoteGroups(folders, notes), [folders, notes]);
-  // Only a search flattens the list. Selecting a folder used to flip the whole
-  // page into a filtered flat list, which dropped the tree the moment you
-  // clicked a folder name — Explorer keeps the tree and just selects the node.
-  const flatMode = searching;
+  const viewGroups = useMemo(() => wbNoteGroups(folders, visibleNotes), [folders, visibleNotes]);
+  // Search keeps the folder tree and only drops folders with no surviving note,
+  // matching the right-rail library and the desktop reference.
   const listRows = useMemo(() => {
-    if (flatMode) return visibleNotes.map((row) => ({ kind: 'note', row, depth: 0 }));
-    const out = [];
-    const walk = (nodes, depth) => {
+    const needle = query.trim().toLowerCase();
+    const buildRows = (nodes, depth) => {
+      const rows = [];
       for (const node of nodes) {
-        const open = expanded.has(node.folder.id);
-        out.push({ kind: 'folder', folder: node.folder, depth, count: node.notes.length, open });
+        const childRows = buildRows(node.children, depth + 1);
+        const nameHit = needle !== '' && node.folder.name.toLocaleLowerCase().includes(needle);
+        if (needle !== '' && node.notes.length === 0 && childRows.length === 0 && !nameHit) continue;
+        const open = searching || expanded.has(node.folder.id);
+        rows.push({ kind: 'folder', folder: node.folder, depth, count: node.notes.length, open });
         if (!open) continue;
-        for (const row of node.notes) out.push({ kind: 'note', row, depth: depth + 1 });
-        walk(node.children, depth + 1);
+        rows.push(...childRows);
+        for (const row of node.notes) rows.push({ kind: 'note', row, depth: depth + 1 });
       }
+      return rows;
     };
-    for (const row of groups.loose) out.push({ kind: 'note', row, depth: 0 });
-    walk(groups.tree, 0);
-    return out;
-  }, [flatMode, visibleNotes, groups, expanded]);
+    const rows = buildRows(viewGroups.tree, 0);
+    if (viewGroups.loose.length > 0) {
+      rows.push({ kind: 'divider', count: viewGroups.loose.length });
+      for (const row of viewGroups.loose) rows.push({ kind: 'note', row, depth: 0 });
+    }
+    return rows;
+  }, [viewGroups, expanded, searching, query]);
 
   const toggleExpanded = useCallback((id) => {
     setExpanded((current) => {
@@ -749,7 +754,7 @@ export function WbNoteLibrary(props) {
           type: 'button',
           className: `wb-folder-row${folderId === undefined ? ' wb-on' : ''}`,
           onClick: () => setFolderId(undefined),
-        }, Glyph.layers(12), h('span', { style: { flex: '1 1 auto' } }, t('wb.notes.root')),
+        }, Glyph.layers(12), h('span', { style: { flex: '1 1 auto' } }, t('notes.library')),
           h('span', { className: 'wb-note-time' }, formatInt(notes.length, locale))),
         loading && notes.length === 0
           ? h('div', { className: 'wb-empty' }, t('wb.notes.loading'))
@@ -757,6 +762,11 @@ export function WbNoteLibrary(props) {
             ? h('div', { className: 'wb-empty' },
               h('p', null, searching ? t('notes.emptySearch') : notes.length === 0 ? t('wb.notes.empty') : t('notes.list.empty')))
             : listRows.map((entry) => {
+              if (entry.kind === 'divider') {
+                return h('div', { key: 'divider', className: 'wb-notes-divider' },
+                  h('span', { style: { flex: '1 1 auto' } }, t('notes.folder.unfiled')),
+                  h('span', { className: 'wb-note-time' }, formatInt(entry.count, locale)));
+              }
               if (entry.kind === 'folder') {
                 return h('div', {
                   key: `f-${entry.folder.id}`,

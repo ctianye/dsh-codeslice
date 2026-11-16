@@ -95,6 +95,11 @@ const Glyph = {
     h('path', { key: 'b', d: 'M16 16l4.5 4.5' }),
   ]),
   close: (size) => frame(size, [h('path', { key: 'a', d: 'M6 6l12 12M18 6L6 18' })]),
+  more: (size) => frame(size, [
+    h('circle', { key: 'a', cx: 5, cy: 12, r: 1.4 }),
+    h('circle', { key: 'b', cx: 12, cy: 12, r: 1.4 }),
+    h('circle', { key: 'c', cx: 19, cy: 12, r: 1.4 }),
+  ]),
   refresh: (size) => frame(size, [
     h('path', { key: 'a', d: 'M20 12a8 8 0 1 1-2.6-5.9' }),
     h('path', { key: 'b', d: 'M20 4.5V10h-5.5' }),
