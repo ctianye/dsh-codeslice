@@ -819,9 +819,8 @@ export function WbNoteLibrary(props) {
                 title: row.title,
                 onClick: () => { void open(row.id); },
               },
-              h('span', { className: 'wb-note-title' }, row.title),
-              h('span', { className: 'wb-note-excerpt' }, row.excerpt ?? ''),
-              h('span', { className: 'wb-note-time' }, formatRelative(locale, row.updatedAt))));
+              h('span', { className: 'wb-note-icon' }, Glyph.notes(12)),
+              h('span', { className: 'wb-note-title' }, row.title)));
             }))),
     h('div', { className: 'wb-reader' },
       error === undefined ? null : h('div', { className: 'wb-banner wb-bad' },

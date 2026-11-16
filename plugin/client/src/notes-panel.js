@@ -467,9 +467,7 @@ export function NotesPanel(props) {
     },
     h('span', { className: 'cs-note-icon' }, Glyph.notes(12)),
     h('span', { className: 'cs-note-main' },
-      h('span', { className: 'cs-note-title' }, row.title),
-      h('span', { className: 'cs-note-excerpt' }, row.excerpt ?? '')),
-    h('span', { className: 'cs-note-time' }, formatRelative(locale, row.updatedAt))),
+      h('span', { className: 'cs-note-title' }, row.title))),
     // Desktop keeps per-row actions on hover; right-click stays as the fast path.
     h('button', {
       type: 'button',

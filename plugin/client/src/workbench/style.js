@@ -177,7 +177,7 @@ export const WORKBENCH_CSS = `
 .wb-iconbtn:hover { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); }
 
 /* One row: batch-export checkbox beside the clickable note row. */
-.wb-note-item { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.wb-note-item { display: flex; align-items: center; gap: 2px; min-width: 0; min-height: 30px; }
 .wb-note-item .wb-note-row { flex: 1 1 auto; min-width: 0; }
 .wb-note-item.wb-on { background: var(--dsw-alias-bg-layer-2); }
 .wb-note-check {
@@ -195,13 +195,13 @@ export const WORKBENCH_CSS = `
 .wb-chevron {
   flex: 0 0 auto;
   width: 16px;
-  height: 18px;
+  height: 30px;
   padding: 0;
   border: none;
   background: transparent;
   color: var(--dsw-alias-label-secondary);
   font-size: 10px;
-  line-height: 18px;
+  line-height: 30px;
   cursor: pointer;
 }
 
@@ -231,14 +231,16 @@ export const WORKBENCH_CSS = `
 .wb-folder-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   width: 100%;
-  padding: 4px 8px;
+  min-height: 30px;
+  padding: 0 8px;
   border: none;
   background: transparent;
-  color: var(--dsw-alias-label-secondary);
+  color: var(--dsw-alias-label-primary);
   font: inherit;
   font-size: 12px;
+  font-weight: 600;
   text-align: left;
   cursor: pointer;
 }
@@ -261,32 +263,28 @@ export const WORKBENCH_CSS = `
 
 .wb-note-row {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
   width: 100%;
-  padding: 6px 8px;
+  min-height: 30px;
+  padding: 0 8px;
   border: none;
-  border-top: 1px solid var(--dsw-alias-border-l1);
   background: transparent;
   color: var(--dsw-alias-label-primary);
   font: inherit;
+  font-size: 12px;
   text-align: left;
   cursor: pointer;
 }
 
 .wb-note-row:hover { background: var(--dsw-alias-bg-layer-1); }
 .wb-note-row.wb-on { background: var(--dsw-alias-bg-layer-2); }
+.wb-note-icon { flex: 0 0 auto; display: flex; color: var(--dsw-alias-label-secondary); }
 
 .wb-note-title {
   font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.wb-note-excerpt {
-  font-size: 10.5px;
-  color: var(--dsw-alias-label-secondary);
+  font-weight: 400;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

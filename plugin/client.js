@@ -9491,7 +9491,7 @@ window.__ModuleLoader__.load({
     .cs-notes-reader { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 
     /* One list row: checkbox for batch export + the row button itself. */
-    .cs-note-item { display: flex; align-items: center; gap: 2px; min-width: 0; }
+    .cs-note-item { display: flex; align-items: center; gap: 2px; min-width: 0; min-height: 30px; }
     .cs-note-item.cs-active { background: var(--dsw-alias-bg-layer-2); }
     .cs-note-item .cs-note-row { flex: 1 1 auto; min-width: 0; }
     .cs-note-item .cs-note-row.cs-active { background: transparent; }
@@ -9527,10 +9527,10 @@ window.__ModuleLoader__.load({
     }
 
     .cs-folder {
-      display: flex; align-items: center; gap: 4px; width: 100%;
-      padding: 2px 8px; min-height: 24px;
+      display: flex; align-items: center; gap: 5px; width: 100%;
+      padding: 0 8px; min-height: 30px;
       border: none; background: transparent; cursor: pointer; text-align: left;
-      font: inherit; font-size: 11.5px; color: inherit; min-width: 0;
+      font: inherit; font-size: 12px; font-weight: 600; color: var(--dsw-alias-label-primary); min-width: 0;
     }
     .cs-folder:hover { background: var(--dsw-alias-bg-layer-1); }
     .cs-folder.cs-active { background: var(--dsw-alias-bg-layer-2); box-shadow: inset 2px 0 var(--dsw-alias-brand-primary); }
@@ -9540,7 +9540,7 @@ window.__ModuleLoader__.load({
     }
     .cs-folder .cs-twist[data-open='true'] { transform: rotate(90deg); }
     .cs-folder .cs-grow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .cs-folder .cs-count { flex: 0 0 auto; font-size: 9.5px; color: var(--dsw-alias-label-secondary); font-variant-numeric: tabular-nums; }
+    .cs-folder .cs-count { flex: 0 0 auto; font-size: 10.5px; color: var(--dsw-alias-label-secondary); font-variant-numeric: tabular-nums; }
     .cs-folder .cs-folder-acts { display: flex; gap: 0; opacity: 0; flex: 0 0 auto; }
     .cs-folder:hover .cs-folder-acts, .cs-folder:focus-within .cs-folder-acts { opacity: 1; }
     .cs-folder-acts .cs-iconbtn { width: 18px; height: 18px; }
@@ -9618,20 +9618,19 @@ window.__ModuleLoader__.load({
     }
 
     .cs-note-row {
-      display: flex; align-items: flex-start; gap: 5px; width: 100%;
-      padding: 4px 8px; border: none; background: transparent; cursor: pointer;
-      text-align: left; font: inherit; color: inherit; min-width: 0;
-      border-bottom: 1px solid var(--dsw-alias-border-l1);
+      display: flex; align-items: center; gap: 7px; width: 100%;
+      padding: 0 8px; min-height: 30px; border: none; background: transparent;
+      cursor: pointer; text-align: left; font: inherit; font-size: 12px; color: inherit; min-width: 0;
     }
     .cs-note-row:hover { background: var(--dsw-alias-bg-layer-1); }
     .cs-note-row.cs-active { background: var(--dsw-alias-bg-layer-2); }
-    .cs-note-row .cs-note-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1 1 auto; }
-    .cs-note-row .cs-note-title { font-size: 11.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .cs-note-row .cs-note-excerpt {
-      font-size: 10.5px; color: var(--dsw-alias-label-secondary);
-      overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    .cs-note-row .cs-note-main { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+    .cs-note-row .cs-note-title {
+      font-size: 12px; font-weight: 400; line-height: 1.4;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .cs-note-row .cs-note-time { flex: 0 0 auto; font-size: 9.5px; color: var(--dsw-alias-label-secondary); }
+    .cs-note-item.cs-active .cs-note-title { font-weight: 600; }
+    .cs-note-row .cs-note-time { flex: 0 0 auto; font-size: 10px; color: var(--dsw-alias-label-secondary); }
 
     .cs-reader-head {
       display: flex; flex-direction: column; gap: 3px;
@@ -10814,9 +10813,7 @@ window.__ModuleLoader__.load({
         },
         h('span', { className: 'cs-note-icon' }, Glyph.notes(12)),
         h('span', { className: 'cs-note-main' },
-          h('span', { className: 'cs-note-title' }, row.title),
-          h('span', { className: 'cs-note-excerpt' }, row.excerpt ?? '')),
-        h('span', { className: 'cs-note-time' }, formatRelative(locale, row.updatedAt))),
+          h('span', { className: 'cs-note-title' }, row.title))),
         // Desktop keeps per-row actions on hover; right-click stays as the fast path.
         h('button', {
           type: 'button',
@@ -14155,7 +14152,7 @@ window.__ModuleLoader__.load({
     .wb-iconbtn:hover { background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-primary); }
 
     /* One row: batch-export checkbox beside the clickable note row. */
-    .wb-note-item { display: flex; align-items: center; gap: 2px; min-width: 0; }
+    .wb-note-item { display: flex; align-items: center; gap: 2px; min-width: 0; min-height: 30px; }
     .wb-note-item .wb-note-row { flex: 1 1 auto; min-width: 0; }
     .wb-note-item.wb-on { background: var(--dsw-alias-bg-layer-2); }
     .wb-note-check {
@@ -14173,13 +14170,13 @@ window.__ModuleLoader__.load({
     .wb-chevron {
       flex: 0 0 auto;
       width: 16px;
-      height: 18px;
+      height: 30px;
       padding: 0;
       border: none;
       background: transparent;
       color: var(--dsw-alias-label-secondary);
       font-size: 10px;
-      line-height: 18px;
+      line-height: 30px;
       cursor: pointer;
     }
 
@@ -14209,14 +14206,16 @@ window.__ModuleLoader__.load({
     .wb-folder-row {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       width: 100%;
-      padding: 4px 8px;
+      min-height: 30px;
+      padding: 0 8px;
       border: none;
       background: transparent;
-      color: var(--dsw-alias-label-secondary);
+      color: var(--dsw-alias-label-primary);
       font: inherit;
       font-size: 12px;
+      font-weight: 600;
       text-align: left;
       cursor: pointer;
     }
@@ -14239,32 +14238,28 @@ window.__ModuleLoader__.load({
 
     .wb-note-row {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
+      flex-direction: row;
+      align-items: center;
+      gap: 7px;
       width: 100%;
-      padding: 6px 8px;
+      min-height: 30px;
+      padding: 0 8px;
       border: none;
-      border-top: 1px solid var(--dsw-alias-border-l1);
       background: transparent;
       color: var(--dsw-alias-label-primary);
       font: inherit;
+      font-size: 12px;
       text-align: left;
       cursor: pointer;
     }
 
     .wb-note-row:hover { background: var(--dsw-alias-bg-layer-1); }
     .wb-note-row.wb-on { background: var(--dsw-alias-bg-layer-2); }
+    .wb-note-icon { flex: 0 0 auto; display: flex; color: var(--dsw-alias-label-secondary); }
 
     .wb-note-title {
       font-size: 12px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .wb-note-excerpt {
-      font-size: 10.5px;
-      color: var(--dsw-alias-label-secondary);
+      font-weight: 400;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -16528,9 +16523,8 @@ window.__ModuleLoader__.load({
                     title: row.title,
                     onClick: () => { void open(row.id); },
                   },
-                  h('span', { className: 'wb-note-title' }, row.title),
-                  h('span', { className: 'wb-note-excerpt' }, row.excerpt ?? ''),
-                  h('span', { className: 'wb-note-time' }, formatRelative(locale, row.updatedAt))));
+                  h('span', { className: 'wb-note-icon' }, Glyph.notes(12)),
+                  h('span', { className: 'wb-note-title' }, row.title)));
                 }))),
         h('div', { className: 'wb-reader' },
           error === undefined ? null : h('div', { className: 'wb-banner wb-bad' },
